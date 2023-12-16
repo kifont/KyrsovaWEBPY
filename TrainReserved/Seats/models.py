@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class Train(models.Model):
     train_number = models.CharField(max_length=10, unique=True, help_text="Номер поїзда")
     departure_station = models.CharField(max_length=100, help_text="Станція відправлення")
@@ -19,5 +20,6 @@ class Seats(models.Model):
     def __str__(self):
         return f"Seat {self.seat_number} in Train {self.train.train_number}"
 
-    class Meta:
-        unique_together = ['train', 'seat_number']
+
+
+

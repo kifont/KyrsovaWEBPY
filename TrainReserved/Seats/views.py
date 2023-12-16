@@ -1,12 +1,37 @@
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
 from .models import Train, Seats
-from .serializers import TrainSerializer, SeatsSerializer
+from rest_framework.authentication import SessionAuthentication, TokenAuthentication
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import TrainSerializer, SeatsSerializer, AdminLoginSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.permissions import IsAuthenticated
 
 class TrainListCreateView(generics.ListCreateAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
+
+class UpdateTrainDataView(APIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def put(self, request, pk, format=None):
+        """
+        Оновлення елемента в базі даних за його первинним ключем (pk).
+        """
+        try:
+            instance = Train.objects.get(pk=pk)
+        except Train.DoesNotExist:
+            return Response({"error": "Елемент не знайдено"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = TrainSerializer(instance, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @swagger_auto_schema(
         operation_description="Отримати список всіх ресурсів",
@@ -22,7 +47,7 @@ class TrainListCreateView(generics.ListCreateAPIView):
             properties={
                 'field1': openapi.Schema(type=openapi.TYPE_STRING),
                 'field2': openapi.Schema(type=openapi.TYPE_STRING),
-                # Додайте інші поля, які очікує ваша модель
+
             },
             required=['field1', 'field2'],
         ),
@@ -32,6 +57,8 @@ class TrainListCreateView(generics.ListCreateAPIView):
         return super().post(request, *args, **kwargs)
 
 class TrainRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Train.objects.all()
     serializer_class = TrainSerializer
 
@@ -69,6 +96,8 @@ class TrainRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 class SeatsListCreateView(generics.ListCreateAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Seats.objects.all()
     serializer_class = SeatsSerializer
 
@@ -95,7 +124,27 @@ class SeatsListCreateView(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
 
+class UpdateSeatsDataView(APIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    def put(self, request, pk, format=None):
+        """
+        Оновлення елемента в базі даних за його первинним ключем (pk).
+        """
+        try:
+            instance = Seats.objects.get(pk=pk)
+        except Seats.DoesNotExist:
+            return Response({"error": "Елемент не знайдено"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SeatsSerializer(instance, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 class SeatsRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Seats.objects.all()
     serializer_class = SeatsSerializer
 
@@ -128,3 +177,28 @@ class SeatsRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     )
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
+
+# class AdminLoginView(APIView):
+#     def post(self, request):
+#         serializer = AdminLoginSerializer(data=request.data)
+#         if serializer.is_valid():
+#             username = serializer.validated_data['username']
+#             password = serializer.validated_data['password']
+#
+#             if not self.check_admin(username):
+#                 return Response({'error': 'Недостатньо прав доступу'}, status=status.HTTP_403_FORBIDDEN)
+#
+#             refresh = RefreshToken.for_user(request.user)
+#             access_token = str(refresh.access_token)
+#
+#             return Response({'access_token': access_token})
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     def check_admin(self, username):
+#         # Логіка перевірки, чи користувач є адміністратором
+#         # У цьому прикладі використовується метод, який перевіряє, чи користувач має атрибут is_staff
+#         try:
+#             user = User.objects.get(username=username)
+#             return user.is_staff
+#         except User.DoesNotExist:
+#             return False
