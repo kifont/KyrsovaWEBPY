@@ -178,27 +178,4 @@ class SeatsRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super().delete(request, *args, **kwargs)
 
-# class AdminLoginView(APIView):
-#     def post(self, request):
-#         serializer = AdminLoginSerializer(data=request.data)
-#         if serializer.is_valid():
-#             username = serializer.validated_data['username']
-#             password = serializer.validated_data['password']
-#
-#             if not self.check_admin(username):
-#                 return Response({'error': 'Недостатньо прав доступу'}, status=status.HTTP_403_FORBIDDEN)
-#
-#             refresh = RefreshToken.for_user(request.user)
-#             access_token = str(refresh.access_token)
-#
-#             return Response({'access_token': access_token})
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#     def check_admin(self, username):
-#         # Логіка перевірки, чи користувач є адміністратором
-#         # У цьому прикладі використовується метод, який перевіряє, чи користувач має атрибут is_staff
-#         try:
-#             user = User.objects.get(username=username)
-#             return user.is_staff
-#         except User.DoesNotExist:
-#             return False
+

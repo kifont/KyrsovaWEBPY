@@ -13,10 +13,7 @@ class AuthenticationAPITestCase(APITestCase):
 
     def test_authentication_success(self):
         data = {'username': 'kif', 'password': '123'}
-        request = self.factory.post(self.url, data, format='json')
-        token = Token.objects.create(user=self.user)
-        request.META['HTTP_AUTHORIZATION'] = f'Token {token.key}'
-        response = self.view(request)
+        response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_authentication_failure(self):
